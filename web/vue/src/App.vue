@@ -1,17 +1,17 @@
 <template>
   <el-container>
-    <el-header v-if="!isLogin">
-      <!-- <app-header></app-header> -->
+    <el-header>
+      <app-header></app-header>
       <app-nav-menu></app-nav-menu>
     </el-header>
-    <el-main>
+    <el-main >
       <div id="main-container" v-cloak>
         <router-view/>
       </div>
     </el-main>
-    <!-- <el-footer>
+    <el-footer>
       <app-footer></app-footer>
-    </el-footer> -->
+    </el-footer>
   </el-container>
 </template>
 
@@ -25,11 +25,6 @@ export default {
   name: 'App',
   data () {
     return {}
-  },
-  computed: {
-    isLogin () {
-      return this.$route.path.includes('user/login')
-    }
   },
   created () {
     installService.status((data) => {
@@ -51,7 +46,6 @@ export default {
   }
   body {
     margin:0;
-    background: #f0f2f5;
   }
   .el-header {
     padding:0;
@@ -67,9 +61,8 @@ export default {
     margin:0;
   }
   #main-container .el-main {
-    /* min-height: -webkit-fill-available; */
-    height: calc(100vh - 140px);
-    /* margin:20px 20px 0 20px; */
+    height: calc(100vh - 116px);
+    margin:20px 20px 0 20px;
   }
   .el-aside .el-menu {
     height: 100%;

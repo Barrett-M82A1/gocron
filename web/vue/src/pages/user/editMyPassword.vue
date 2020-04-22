@@ -2,6 +2,9 @@
   <el-container>
     <el-main>
       <el-form ref="form" :model="form" :rules="formRules" label-width="100px" style="width: 500px;">
+        <el-form-item label="原密码" prop="old_password">
+          <el-input v-model="form.old_password" type="password"></el-input>
+        </el-form-item>
         <el-form-item label="新密码" prop="new_password">
           <el-input v-model="form.new_password" type="password"></el-input>
         </el-form-item>
@@ -20,15 +23,18 @@
 <script>
 import userService from '../../api/user'
 export default {
-  name: 'user-edit-password',
+  name: 'user-edit-my-password',
   data: function () {
     return {
       form: {
-        id: '',
+        old_password: '',
         new_password: '',
         confirm_new_password: ''
       },
       formRules: {
+        old_password: [
+          {required: true, message: '请输入原密码', trigger: 'blur'}
+        ],
         new_password: [
           {required: true, message: '请输入新密码', trigger: 'blur'}
         ],
@@ -37,13 +43,6 @@ export default {
         ]
       }
     }
-  },
-  created () {
-    const id = this.$route.params.id
-    if (!id) {
-      return
-    }
-    this.form.id = id
   },
   methods: {
     submit () {
@@ -55,12 +54,12 @@ export default {
       })
     },
     save () {
-      userService.editPassword(this.form, () => {
-        this.$router.push('/user')
+      userService.editMyPassword(this.form, () => {
+        this.$router.back()
       })
     },
     cancel () {
-      this.$router.push('/user')
+      this.$router.back()
     }
   }
 }

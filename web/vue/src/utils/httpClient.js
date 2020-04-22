@@ -36,10 +36,9 @@ axios.interceptors.response.use(data => {
   return Promise.reject(error)
 })
 
-// 增加错误的处理
-function handle (promise, next, catcher) {
+function handle (promise, next) {
   promise.then((res) => successCallback(res, next))
-    .catch((error) => failureCallback(error, catcher))
+    .catch((error) => failureCallback(error))
 }
 
 function checkResponseCode (code, msg) {
@@ -73,14 +72,10 @@ function successCallback (res, next) {
   next(res.data.data, res.data.code, res.data.message)
 }
 
-function failureCallback (error, next) {
+function failureCallback (error) {
   Message.error({
     message: '请求失败 - ' + error
   })
-  if (!next) {
-    return
-  }
-  next(error)
 }
 
 export default {
@@ -111,7 +106,7 @@ export default {
     })).catch((error) => failureCallback(error))
   },
 
-  post (uri, data, next, failureCallback) {
+  post (uri, data, next) {
     const promise = axios.post(uri, Qs.stringify(data), {
       headers: {
         post: {
@@ -119,6 +114,6 @@ export default {
         }
       }
     })
-    handle(promise, next, failureCallback)
+    handle(promise, next)
   }
 }
