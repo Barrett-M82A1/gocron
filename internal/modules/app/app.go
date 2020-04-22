@@ -53,6 +53,12 @@ func InitEnv(versionString string) {
 
 // IsInstalled 判断应用是否已安装
 func IsInstalled() bool {
+
+	// 环境变量检测安装状态
+	if setting.ReadEnv("INSTALL_STATUS", "") == "success" {
+		return true
+	}
+
 	_, err := os.Stat(filepath.Join(ConfDir, "/install.lock"))
 	if os.IsNotExist(err) {
 		return false

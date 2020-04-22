@@ -2,6 +2,8 @@ package setting
 
 import (
 	"errors"
+	"os"
+	"strconv"
 
 	"github.com/ouqiang/gocron/internal/modules/logger"
 	"github.com/ouqiang/gocron/internal/modules/utils"
@@ -38,15 +40,70 @@ type Setting struct {
 	AuthSecret       string
 }
 
+func ReadEnv(key string, value string) string {
+	if os.Getenv(key) == "" {
+		return value
+	}
+
+	return os.Getenv(key)
+}
+
 // 读取配置
 func Read(filename string) (*Setting, error) {
+
+	var s Setting
+
+	// 如果存在环境变量配置优先读取
+	if ReadEnv("ENV_CONFIG", "off") == "open" {
+		s.Db.Engine = ReadEnv("DB_ENGINE", "mysql")
+		s.Db.Host = ReadEnv("DB_HOST", "127.0.0.1")
+		s.Db.Port, _ = strconv.Atoi(ReadEnv("DB_PORT", "3306"))
+		s.Db.User = ReadEnv("DB_USER", "")
+		s.Db.Password = ReadEnv("DB_PASSWORD", "")
+		s.Db.Database = ReadEnv("DB_DATABASE", "gocron")
+		s.Db.Prefix = ReadEnv("DB_PREFIX", "")
+		s.Db.Charset = ReadEnv("DB_CHARSET", "utf8")
+		s.Db.MaxIdleConns, _ = strconv.Atoi(ReadEnv("DB_MAXIDLECONNS", "30"))
+		s.Db.MaxOpenConns, _ = strconv.Atoi(ReadEnv("DB_MAXOPENCONNS", "100"))
+
+		s.AllowIps = ReadEnv("ALLOW_IPS", "")
+		s.AppName = ReadEnv("APP_NAME", "定时任务管理系统")
+		s.ApiKey = ReadEnv("API_KEY", "")
+		s.ApiSecret = ReadEnv("API_SECRET", "")
+		s.ApiSignEnable, _ = strconv.ParseBool(ReadEnv("API_SIGN_ENABLE", "true"))
+		s.ConcurrencyQueue, _ = strconv.Atoi(ReadEnv("CONCURRENCY_QUEUE", "500"))
+		s.AuthSecret = ReadEnv("AUTH_SECRET", "")
+		if s.AuthSecret == "" {
+			s.AuthSecret = utils.RandAuthToken()
+		}
+
+		s.EnableTLS, _ = strconv.ParseBool(ReadEnv("ENABLE_TLS", "false"))
+		s.CAFile = ReadEnv("CA_FILE", "")
+		s.CertFile = ReadEnv("CERT_FILE", "")
+		s.KeyFile = ReadEnv("KEY_FILE", "")
+
+		if s.EnableTLS {
+			if !utils.FileExist(s.CAFile) {
+				logger.Fatalf("failed to read ca cert file: %s", s.CAFile)
+			}
+
+			if !utils.FileExist(s.CertFile) {
+				logger.Fatalf("failed to read client cert file: %s", s.CertFile)
+			}
+
+			if !utils.FileExist(s.KeyFile) {
+				logger.Fatalf("failed to read client key file: %s", s.KeyFile)
+			}
+		}
+
+		return &s, nil
+	}
+
 	config, err := ini.Load(filename)
 	if err != nil {
 		return nil, err
 	}
 	section := config.Section(DefaultSection)
-
-	var s Setting
 
 	s.Db.Engine = section.Key("db.engine").MustString("mysql")
 	s.Db.Host = section.Key("db.host").MustString("127.0.0.1")
