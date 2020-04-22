@@ -14,7 +14,7 @@ WORKDIR /app
 
 COPY ./bin /app/
 
-RUN chown -R app:app ./
+RUN mkdir /app/log && chown app:app -R /app && chmod -R 777 /app
 
 EXPOSE 5920
 
