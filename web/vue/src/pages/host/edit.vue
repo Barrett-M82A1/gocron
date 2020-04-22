@@ -1,12 +1,11 @@
 <template>
-  <el-container>
-    <el-main>
-      <el-form ref="form" :model="form" :rules="formRules" label-width="100px" style="width: 500px;">
-        <el-form-item>
+  <div style="padding:0 20px" v-loading="pageLoading">
+      <el-form ref="hform" :model="form" :rules="formRules" label-width="100px">
+        <el-form-item style="visiblity:hidden">
           <el-input v-model="form.id" type="hidden"></el-input>
         </el-form-item>
         <el-form-item label="节点名称" prop="alias">
-          <el-input v-model="form.alias"></el-input>
+          <el-input v-model="form.alias" ref="alias"></el-input>
         </el-form-item>
         <el-form-item label="主机名" prop="name">
           <el-input v-model="form.name"></el-input>
@@ -23,19 +22,21 @@
             v-model="form.remark">
           </el-input>
         </el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="submit()">保存</el-button>
-          <el-button @click="cancel">取消</el-button>
-        </el-form-item>
       </el-form>
-    </el-main>
-  </el-container>
+      <div slot="footer" style="margin-top:20px;">
+        <el-button type="primary" @click="submit()" style="width:35%;float:right;" :loading="saveBtnLoading">保存</el-button>
+        <el-button @click="cancel" style="width:35%;float:right;margin-right:20px">取消</el-button>
+      </div>
+  </div>
 </template>
 
 <script>
 import hostService from '../../api/host'
 export default {
-  name: 'edit',
+  name: 'editDialog',
+  props: {
+    hostid: Number
+  },
   data: function () {
     return {
       form: {
@@ -45,6 +46,8 @@ export default {
         alias: '',
         remark: ''
       },
+      pageLoading: false,
+      saveBtnLoading: false,
       formRules: {
         name: [
           {required: true, message: '请输入主机名', trigger: 'blur'}
@@ -59,27 +62,33 @@ export default {
       }
     }
   },
-  created () {
-    const id = this.$route.params.id
-    if (!id) {
-      return
-    }
-    hostService.detail(id, (data) => {
-      if (!data) {
-        this.$message.error('数据不存在')
-        this.cancel()
-        return
-      }
-      this.form.id = data.id
-      this.form.name = data.name
-      this.form.port = data.port
-      this.form.alias = data.alias
-      this.form.remark = data.remark
-    })
+  mounted () {
+    this.$refs.alias.focus()
+    this.fetchData()
   },
   methods: {
+    fetchData () {
+      const id = this.hostid
+      if (!id) {
+        return
+      }
+      this.pageLoading = true
+      hostService.detail(id, (data) => {
+        this.pageLoading = false
+        if (!data) {
+          this.$message.error('数据不存在')
+          this.cancel()
+          return
+        }
+        this.form.id = data.id
+        this.form.name = data.name
+        this.form.port = data.port
+        this.form.alias = data.alias
+        this.form.remark = data.remark
+      })
+    },
     submit () {
-      this.$refs['form'].validate((valid) => {
+      this.$refs['hform'].validate((valid) => {
         if (!valid) {
           return false
         }
@@ -87,12 +96,33 @@ export default {
       })
     },
     save () {
+      this.saveBtnLoading = true
       hostService.update(this.form, () => {
-        this.$router.push('/host')
+        this.saveBtnLoading = false
+        this.$message.success('保存成功')
+        this.resetForm()
+        this.$emit('complete')
       })
     },
     cancel () {
-      this.$router.push('/host')
+      this.resetForm()
+      this.$emit('complete')
+    },
+    resetForm () {
+      this.form = {
+        id: '',
+        name: '',
+        port: 5921,
+        alias: '',
+        remark: ''
+      }
+    }
+  },
+  watch: {
+    hostid (newVal, oldVal) {
+      if (newVal !== oldVal) {
+        this.fetchData()
+      }
     }
   }
 }
