@@ -1,5 +1,14 @@
 FROM registry.cn-shanghai.aliyuncs.com/zhangju/alpine:3.7
 
+ENV INSTALL_STATUS=success \
+    ENV_CONFIG=open \
+    DB_ENGINE=mysql \
+    DB_HOST=127.0.0.1 \
+    DB_USER=root \
+    DB_PASSWORD=root \
+    DB_PORT=3600 \
+    DB_DATABASE=cron
+
 # 设置源
 RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositories \
     && apk update
