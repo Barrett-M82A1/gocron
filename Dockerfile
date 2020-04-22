@@ -1,4 +1,4 @@
-FROM alpine:3.7
+FROM registry.cn-shanghai.aliyuncs.com/zhangju/alpine:3.7
 
 RUN apk add --no-cache ca-certificates tzdata \
     && addgroup -S app \
