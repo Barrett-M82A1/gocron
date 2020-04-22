@@ -20,11 +20,9 @@ kill:
 
 .PHONY: gocron
 gocron:
-	go build $(RACE) -o bin/gocron ./cmd/gocron
+	GOOS=linux CGO_ENABLED=0 go build $(RACE) -tags netgo -o bin/gocron ./cmd/gocron
 
 .PHONY: node
-node:
-	go build $(RACE) -o bin/gocron-node ./cmd/node
 
 .PHONY: test
 test:

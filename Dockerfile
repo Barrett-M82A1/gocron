@@ -1,6 +1,10 @@
-FROM registry.cn-shanghai.aliyuncs.com/linux_alpine/alpine:3.9
+FROM registry.cn-shanghai.aliyuncs.com/zhangju/alpine:3.7
 
-RUN apk add --no-cache ca-certificates tzdata \
+# 设置源
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositories \
+    && apk update
+
+RUN apk add --no-cache ca-certificates tzdata g++ gcc \
     && addgroup -S app \
     && adduser -S -g app app
 
@@ -16,4 +20,6 @@ EXPOSE 5920
 
 USER app
 
-ENTRYPOINT ["/app/gocron", "web"]
+VOLUME ["/app/log"]
+
+ENTRYPOINT ["/app/gocron","web"]
