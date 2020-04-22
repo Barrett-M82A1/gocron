@@ -6,7 +6,7 @@ ENV INSTALL_STATUS=success \
     DB_HOST=127.0.0.1 \
     DB_USER=root \
     DB_PASSWORD=root \
-    DB_PORT=3600 \
+    DB_PORT=3306 \
     DB_DATABASE=cron
 
 # 设置源
